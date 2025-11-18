@@ -34,18 +34,33 @@ const Home = () => {
   ];
 
   const [inventory, setInventory] = useState(() => {
-    const saved = localStorage.getItem('inventory');
-    return saved ? JSON.parse(saved) : toolsInventory;
+    try {
+      if (typeof window === 'undefined') return toolsInventory;
+      const saved = localStorage.getItem('inventory');
+      return saved ? JSON.parse(saved) : toolsInventory;
+    } catch (e) {
+      return toolsInventory;
+    }
   });
 
   const [transactions, setTransactions] = useState(() => {
-    const saved = localStorage.getItem('transactions');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      if (typeof window === 'undefined') return [];
+      const saved = localStorage.getItem('transactions');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   const [userLoans, setUserLoans] = useState(() => {
-    const saved = localStorage.getItem('userLoans');
-    return saved ? JSON.parse(saved) : {};
+    try {
+      if (typeof window === 'undefined') return {};
+      const saved = localStorage.getItem('userLoans');
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
   });
 
   useEffect(() => {
