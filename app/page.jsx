@@ -165,15 +165,18 @@ const Home = () => {
       return;
     }
 
-    await sendArduinoCommand('unlock', { userId: userId });
-    
     setCurrentUser(user);
-    setUnlockTimer(30);
-    showSuccess(`Bem-vindo, ${user.name}! Carrinho desbloqueado.`);
     setScreen('menu');
     setUserId('');
     setPassword('');
   };
+
+  const abrir_trava = async (currentUser) => { 
+    await sendArduinoCommand('unlock', { userId: currentUser.id });
+  
+    setUnlockTimer(30);
+    showSuccess(`Bem-vindo, ${currentUser.name}! Carrinho desbloqueado.`);
+  }
 
   const handleSelectTool = (toolId, quantity) => {
     setSelectedTools(prev => ({
@@ -206,7 +209,7 @@ const Home = () => {
     setScreen('confirmation');
   };
 
-  const handleFinalConfirm = () => {
+  const handleFinalConfirm = async () => {
     const timestamp = new Date().toISOString();
     const loanId = Date.now();
 
@@ -247,6 +250,8 @@ const Home = () => {
       [currentUser.id]: [...(prev[currentUser.id] || []), transaction]
     }));
 
+    await abrir_trava(currentUser.id)
+
     setSelectedTools({});
     showSuccess('Empréstimo registrado com sucesso!');
     setTimeout(() => {
@@ -254,7 +259,7 @@ const Home = () => {
     }, 2000);
   };
 
-  const handleReturnTools = (loanId) => {
+  const handleReturnTools = async (loanId) => {
     const timestamp = new Date().toISOString();
     
     const transaction = transactions.find(t => t.id === loanId);
@@ -281,6 +286,8 @@ const Home = () => {
       ...prev,
       [currentUser.id]: updatedUserLoans
     }));
+
+    await abrir_trava(currentUser.id)
 
     showSuccess('Ferramentas devolvidas com sucesso!');
   };
