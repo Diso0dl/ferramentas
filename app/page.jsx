@@ -113,21 +113,32 @@ const Home = () => {
   };
 
   const sendArduinoCommand = async (command, data = {}) => {
-    try {
-      const response = await fetch(`http://${arduinoIP}/${command}`, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      });
-      return { success: true };
-    } catch (err) {
-      console.log('Simulando comando para Arduino:', command, data);
-      return { success: true };
-    }
-  };
+  try {
+    // Criar os parâmetros para a URL
+    const params = new URLSearchParams();
+    
+    if (data.userId) params.append('user', data.userId);
+    if (data.userName) params.append('name', data.userName);
+    if (data.tools) params.append('tools', data.tools);
+    
+    const url = `http://${arduinoIP}/${command}?${params.toString()}`;
+    
+    console.log('🔍 Enviando para ESP32:', url);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      mode: 'cors', // Mudei de 'no-cors' para 'cors'
+    });
+    
+    console.log('✅ Resposta do ESP32:', response.status);
+    return { success: true };
+  } catch (err) {
+    console.error('❌ Erro ao enviar comando:', err);
+    console.log('Simulando comando para Arduino:', command, data);
+    return { success: true };
+  }
+};
+
 
   useEffect(() => {
     if (unlockTimer > 0) {
@@ -171,12 +182,16 @@ const Home = () => {
     setPassword('');
   };
 
-  const abrir_trava = async (currentUser) => { 
-    await sendArduinoCommand('unlock', { userId: currentUser.id });
-  
-    setUnlockTimer(30);
-    showSuccess(`Bem-vindo, ${currentUser.name}! Carrinho desbloqueado.`);
-  }
+  const abrir_trava = async (userId, userName, tools) => { 
+  await sendArduinoCommand('unlock', { 
+    userId: userId,
+    userName: userName,
+    tools: tools
+  });
+
+  setUnlockTimer(30);
+  showSuccess(`Bem-vindo, ${userName}! Carrinho desbloqueado.`);
+}
 
   const handleSelectTool = (toolId, quantity) => {
     setSelectedTools(prev => ({
@@ -250,7 +265,8 @@ const Home = () => {
       [currentUser.id]: [...(prev[currentUser.id] || []), transaction]
     }));
 
-    await abrir_trava(currentUser.id)
+    const toolsList = selectedItems.map(item => item.toolName).join(', ');
+await abrir_trava(currentUser.id, currentUser.name, toolsList);
 
     setSelectedTools({});
     showSuccess('Empréstimo registrado com sucesso!');
@@ -287,7 +303,8 @@ const Home = () => {
       [currentUser.id]: updatedUserLoans
     }));
 
-    await abrir_trava(currentUser.id)
+    const toolsList = transaction.items.map(item => item.toolName).join(', ');
+await abrir_trava(currentUser.id, currentUser.name, toolsList);
 
     showSuccess('Ferramentas devolvidas com sucesso!');
   };
