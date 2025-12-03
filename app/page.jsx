@@ -315,6 +315,19 @@ await abrir_trava(currentUser.id, currentUser.name, toolsList);
     setSelectedTools({});
     setUnlockTimer(0);
   };
+// Substitua a função handleLogout por esta versão:
+
+const handleLogout = async () => {
+  // Apagar o LED antes de sair
+  await sendArduinoCommand('lock');
+  
+  setCurrentUser(null);
+  setScreen('login');
+  setSelectedTools({});
+  setUnlockTimer(0);
+  
+  showSuccess('LED apagado. Até logo!');
+};
 
   const formatDate = (isoString) => {
     const date = new Date(isoString);
