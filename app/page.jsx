@@ -309,12 +309,6 @@ await abrir_trava(currentUser.id, currentUser.name, toolsList);
     showSuccess('Ferramentas devolvidas com sucesso!');
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setScreen('login');
-    setSelectedTools({});
-    setUnlockTimer(0);
-  };
 // Substitua a função handleLogout por esta versão:
 
 const handleLogout = async () => {
